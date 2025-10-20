@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Voyage vers soi — Jeu d'introspection</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;background:linear-gradient(180deg,#FFF8FB 0%,#FFF9F2 40%,#FFFDF9 100%);padding:20px;display:flex;flex-direction:column;align-items:center;min-height:100vh;gap:16px;}
+header{text-align:center;margin-top:6vh;}
+h1{font-size:28px;color:#AA6CFF;letter-spacing:0.6px;}
+h2{font-size:14px;color:#FF8C94;margin-top:6px;font-weight:600;}
+.subtitle{margin-top:10px;font-size:13px;color:#7a7a7a;max-width:760px;line-height:1.5;}
+#mainMenu{margin-top:18px;display:flex;flex-direction:column;gap:12px;align-items:center;width:100%;max-width:760px;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;width:100%;}
+.btn{min-width:140px;padding:14px 18px;border-radius:30px;border:none;cursor:pointer;font-weight:600;box-shadow:0 6px 18px rgba(100,80,120,0.08);transition: transform .18s ease, box-shadow .18s ease;}
+.btn:active{transform:translateY(2px);}
+.btn-em{background:linear-gradient(135deg,#E7DAFF,#D2C2FF);color:#4b0066;}
+.btn-ac{background:linear-gradient(135deg,#FFD9E0,#FFC7D6);color:#7a0030;}
+.btn-dv{background:linear-gradient(135deg,#FFF9D6,#FFF2B8);color:#6a4b00;}
+#cardDisplay{width:100%;max-width:760px;display:none;margin-top:6px;}
+.card{background:rgba(255,255,255,0.88);border-radius:20px;padding:22px;box-shadow:0 12px 30px rgba(40,30,60,0.06);border:1px solid rgba(200,180,220,0.12);}
+.card h3{color:#6d3f6d;font-size:18px;margin-bottom:8px;}
+.card p{font-size:15px;color:#4a3a4a;line-height:1.5;margin-bottom:12px;}
+.reflection{min-height:90px;padding:12px;border-radius:10px;border:2px dashed rgba(255,180,195,0.4);background:linear-gradient(180deg,#fffdfa,#fff7f3);color:#5b3b4b;font-size:14px;text-align:left;overflow:auto;}
+.controls{display:flex;gap:10px;margin-top:14px;justify-content:center;}
+.ghost{background:transparent;border:1px solid rgba(120,100,140,0.12);padding:10px 14px;border-radius:14px;color:#7b6a7b;cursor:pointer;}
+</style>
+</head>
+<body>
+<header>
+<h1>🌸 Voyage vers soi</h1>
+<h2>Jeu d’introspection — Par Mabire Laura</h2>
+<div class="subtitle">Choisis Émotion, Action ou Voix Divine, tire une carte et écris tes réflexions.</div>
+</header>
+<main id="mainArea" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+<section id="mainMenu">
+<div class="btn-row" style="margin-top:10px;">
+<button class="btn btn-em" onclick="drawCard('emotion')">Émotion</button>
+<button class="btn btn-ac" onclick="drawCard('action')">Action</button>
+<button class="btn btn-dv" onclick="drawCard('divine')">Voix Divine</button>
+</div>
+<div class="note" style="margin-top:8px;">Écris tes pensées dans la zone ci-dessous. Tout reste local.</div>
+</section>
+<section id="cardDisplay" aria-hidden="true">
+<div class="card">
+<h3 id="cardTitle">Titre</h3>
+<p id="cardText">Texte de la carte...</p>
+<div id="reflectionBox" class="reflection" contenteditable="true" aria-label="Zone d'écriture">Écris ici tes réflexions…</div>
+<div class="controls">
+<button class="btn btn-em" onclick="backToMenu()">Retour au tirage</button>
+<button class="ghost" onclick="saveNote()">Sauvegarder la note</button>
+</div>
+</div>
+</section>
+</main>
+<script>
+const cards={emotion:[{title:"Rejet",text:"Je me sens invisible, comme si ma présence ne comptait pas."},{title:"Abandon",text:"Je redoute d’être seule, oubliée."},{title:"Trahison",text:"Je me sens trahie."},{title:"Injustice",text:"Je ressens une colère face à ce qui me semble inéquitable."},{title:"Humiliation",text:"J’ai peur d’être jugée ou rabaissée."},{title:"Culpabilité",text:"Je porte sur mes épaules une responsabilité qui n’est peut-être pas la mienne."},{title:"Peur",text:"Je m’inquiète du futur."},{title:"Frustration",text:"Je ressens un écart entre mes désirs profonds et la réalité."}],action:[{title:"Respiration",text:"Ferme les yeux, inspire la paix, expire la peur."},{title:"Écriture",text:"Écris sans filtre ce que tu ressens."},{title:"Silence",text:"Reste simplement là, observe."},{title:"Mouvement",text:"Danse, marche, respire."},{title:"Création",text:"Exprime ton monde intérieur."},{title:"Dialogue intérieur",text:"Parle à ton enfant intérieur."},{title:"Gratitude",text:"Écris trois choses pour lesquelles tu es reconnaissante."},{title:"Libération",text:"Écris ce que tu veux laisser partir et symboliquement libère-le."}],divine:[{title:"Lumière",text:"Même dans la nuit, ma lumière intérieure ne s’éteint jamais."},{title:"Amour",text:"Je mérite d’être aimée simplement parce que j’existe."},{title:"Paix",text:"Je choisis la douceur plutôt que la lutte."},{title:"Confiance",text:"Je n’ai pas besoin de tout comprendre, la vie me guide."},{title:"Guérison",text:"Chaque blessure est une ouverture vers plus de conscience."},{title:"Pardon",text:"Je me libère du passé pour redevenir entière."},{title:"Foi",text:"Je crois en la sagesse de ce qui m’arrive."},{title:"Unité",text:"Je ne suis séparée de rien. Tout est relié à l’amour."}]};
+function drawCard(type){const list=cards[type];const card=list[Math.floor(Math.random()*list.length)];const title=type==='divine'?`Voix Divine — ${card.title}`:`${capitalize(type)} — ${card.title}`;document.getElementById('cardTitle').innerText=title;document.getElementById('cardText').innerText=card.text;document.getElementById('reflectionBox').innerText='';document.getElementById('mainMenu').style.display='none';document.getElementById('cardDisplay').style.display='block';document.getElementById('cardDisplay').setAttribute('aria-hidden','false');}
+function backToMenu(){document.getElementById('cardDisplay').style.display='none';document.getElementById('mainMenu').style.display='block';document.getElementById('cardDisplay').setAttribute('aria-hidden','true');}
+function capitalize(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+function saveNote(){const title=document.getElementById('cardTitle').innerText;const note=document.getElementById('reflectionBox').innerText.trim();if(!note){alert("Écris quelque chose d’abord 😉");return;}const key='voyage_notes';const prev=JSON.parse(localStorage.getItem(key)||'[]');prev.push({title:title,note:note,date:new Date().toISOString()});localStorage.setItem(key,JSON.stringify(prev));alert("Note sauvegardée localement ✅");}
+</script>
+</body>
+</html>
